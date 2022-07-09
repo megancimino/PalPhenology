@@ -1,0 +1,104 @@
+
+chemtax
+
+```{r}
+library(ggplot2)
+library(reshape2)
+library(viridis)
+library(dplyr)
+
+#load in chemtax data and fix date index (which is NOT a real date, just an index)
+c_data <- read.csv('ChemTax_AvgProp_1wk.csv')
+c_data$date_index <- as.Date(c_data$date_index)
+c_data$Taxa[which(c_data$Taxa== "Mixed.Flagellates")]<-  "Mixed Flagellates"
+
+theme_set(theme_bw())
+theme_update(text = element_text(size=20),
+             axis.text= element_text(colour = "black"),
+             panel.grid.major = element_blank(),
+             panel.grid.minor = element_blank(),
+             strip.background = element_blank(),
+             axis.title=element_text(size=18))
+
+# graph stacked area chart
+p<- ggplot(c_data) + 
+    geom_area(aes(x=date_index, y=Proportion,fill=Taxa), alpha =0.8) +
+    scale_x_date(date_breaks = "months" , date_labels = "%b", limits= c(as.Date("2021-10-31"), as.Date("2022-03-31"))) + 
+    labs(x = NULL, y = 'Relative Abundance') + 
+    scale_y_continuous(breaks = c(0,.5,1), label = c("0%","50%", "100%")) + 
+    scale_fill_viridis(discrete = T, name = "Phytoplankton",option="D", direction = -1) #+   theme_bw() 
+#setwd(plot_wd)
+ggsave(p, filename = "PhytoplanktonSpecies.pdf", device="pdf", width=8, height=3.5)
+```
+
+
+zooplankton
+
+```{r}
+library(ggplot2)
+library(reshape2)
+library(viridis)
+library(dplyr)
+
+#load zooplankton data and fix date format (which is NOT a real date, just an index)
+z_data <- read.csv('Zoop_AvgProp_1wk.csv')
+z_data$Date_1wk <- as.Date(z_data$Date_1wk, format = "%m/%d/%y")
+
+# convert taxa to factor for ordering in plot
+z_data$Taxa <- factor(z_data$Taxa, levels=c("Pteropoda", "Esuperba", "Tmacrura",
+                                            "Copepoda", "Other"))
+
+theme_set(theme_bw())
+theme_update(text = element_text(size=20),
+             axis.text= element_text(colour = "black"),
+             panel.grid.major = element_blank(),
+             panel.grid.minor = element_blank(),
+             strip.background = element_blank(),
+             axis.title=element_text(size=18))
+
+# graph stacked area chart
+p<- ggplot(z_data) + 
+    geom_area(aes(fill=Taxa, x=Date_1wk, y=Proportion), alpha =0.8) +
+    scale_x_date(date_breaks = "months" , date_labels = "%b", limits= c(as.Date("2017-10-31"), as.Date("2018-03-31"))) + 
+    labs(x = NULL, y = 'Relative Dry Weight') + 
+    scale_y_continuous(breaks = c(0,.5,1), label = c("0%", "50%", "100%")) + 
+    scale_fill_viridis(discrete = T, name = "Zooplankton", option = "mako", direction = -1,
+                       labels = c("Pteropoda", expression(paste(italic("E. superba"))),
+                                expression(paste(italic("T. macrura"))),
+                                "Copepoda", "Other"))
+
+ggsave(p, filename = "ZoooplanktonSpecies.pdf", device="pdf", width=7.5, height=3.5)
+```
+
+bacteria
+
+```{r}
+#load zooplankton data and fix date format (which is NOT a real date, just an index)
+b_data <- read.csv('Bacteria_AvgProp_1wk.csv')
+b_data$date_index <- as.Date(b_data$date_index)
+
+# convert taxa to factor for ordering in plot
+b_data$Taxa <- factor(z_data$Taxa, levels=c("Flavobacteriales" ,"Pelagibacterales" ,
+                                            "Rhodobacterales" , "Unclassified" ,    "Other" )   ) 
+
+
+theme_set(theme_bw())
+theme_update(text = element_text(size=20),
+             axis.text= element_text(colour = "black"),
+             panel.grid.major = element_blank(),
+             panel.grid.minor = element_blank(),
+             strip.background = element_blank(),
+             axis.title=element_text(size=18))
+
+#graph
+p<-ggplot(b_data) + 
+    geom_area(aes(x=date_index, y=Proportion,fill=Taxa), alpha =0.8) + 
+    scale_x_date(date_breaks = "months" , date_labels = "%b", limits= c(as.Date("2000-10-31"), as.Date("2001-03-31"))) +  
+    labs(x = NULL, y = 'Relative Abundance') + 
+    scale_y_continuous(breaks = c(0,.5,1), label = c("0%","50%", "100%")) + 
+    scale_fill_viridis(discrete = T, name = "Bacteria", option = "C",
+                       labels=c("Flavobacteriales" ,"Pelagibacterales" ,
+                                            "Rhodobacterales" ,  "Other","Unclassified" ) ) 
+  
+    ggsave(p, filename = "BacteriaSpecies.pdf", device="pdf", width=8, height=3.5)
+```
